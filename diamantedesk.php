@@ -3,6 +3,7 @@ if (!defined('_PS_VERSION_')) {
     exit;
 }
 
+include_once(dirname(__FILE__) . '/Api.php');
 include_once(dirname(__FILE__) . '/Config.php');
 
 class DiamanteDesk extends Module

@@ -19,21 +19,23 @@ class DiamanteDesk_Config extends DiamanteDesk
     public function renderForm()
     {
 
+        $branches = getDiamanteDeskApi()->getBranches();
+
         $options = array(
             array(
-                'id_option' => 1,
+                'id_option' => 0,
                 'name' => 'All'
-            ), array(
-                'id_option' => 2,
-                'name' => 'All 1'
-            ), array(
-                'id_option' => 3,
-                'name' => 'All 2'
-            ), array(
-                'id_option' => 4,
-                'name' => 'All 3'
             ),
         );
+
+        if ($branches) {
+            foreach ($branches as $branch) {
+                $options[] = array(
+                    'id_option' => $branch->id,
+                    'name' => $branch->name
+                );
+            }
+        }
 
         $fields_form = array(
             'form' => array(
@@ -60,23 +62,26 @@ class DiamanteDesk_Config extends DiamanteDesk
                         'name' => 'DIAMANTEDESK_API_KEY',
                         'required' => true
                     ),
-                    array(
-                        'type' => 'select',
-                        'lang' => true,
-                        'label' => $this->l('Default Branch'),
-                        'name' => 'DIAMANTEDESK_DEFAULT_BRANCH',
-                        'options' => array(
-                            'query' => $options,
-                            'id' => 'id_option',
-                            'name' => 'name'
-                        ),
-                    ),
                 ),
                 'submit' => array(
                     'title' => $this->l('Save'),
                 )
             ),
         );
+
+        if ($branches) {
+            $fields_form['form']['input'][] = array(
+                'type' => 'select',
+                'lang' => true,
+                'label' => $this->l('Default Branch'),
+                'name' => 'DIAMANTEDESK_DEFAULT_BRANCH',
+                'options' => array(
+                    'query' => $options,
+                    'id' => 'id_option',
+                    'name' => 'name'
+                ),
+            );
+        }
 
         $helper = new HelperForm();
         $helper->show_toolbar = false;
