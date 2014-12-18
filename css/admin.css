@@ -1,0 +1,11 @@
+.icon-AdminDiamanteDesk:before {
+    content: url("../img/AdminDiamanteDesk.png");
+}
+
+.icon-AdminDiamanteDeskDark:before {
+    content: url("../img/AdminDiamanteDeskDark.png");
+}
+
+.icon-AdminDiamanteDeskDark {
+    width: 24px;
+}
