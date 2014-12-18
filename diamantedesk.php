@@ -42,7 +42,7 @@ class DiamanteDesk extends Module
 
         $tab = new Tab();
         // Need a foreach for the language
-        $tab->name[$this->context->language->id] = $this->l('Configuration');
+        $tab->name[$this->context->language->id] = $this->l('All Tickets');
         $tab->class_name = 'AdminDiamanteDesk';
         $tab->id_parent = $parentTab->id;
         $tab->module = $this->name;

@@ -132,12 +132,23 @@ class DiamanteDesk_Api
     }
 
     /**
-     * @return bool|mixed|string
+     * @return mixed
      */
     public function getBranches()
     {
         $this->init()
             ->setMethod('desk/branches')
+            ->doRequest();
+        return $this->result;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getTickets()
+    {
+        $this->init()
+            ->setMethod('desk/tickets')
             ->doRequest();
         return $this->result;
     }
