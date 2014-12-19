@@ -47,10 +47,12 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     }
 
-    public function getList()
+    public function getList($id_lang, $order_by = null, $order_way = null, $start = 0, $limit = null, $id_lang_shop = false)
     {
+        $this->addJs(_MODULE_DIR_ . $this->module->name . '/js/blankLink.js');
         $tickets = getDiamanteDeskApi()->getTickets();
         $this->_list = array();
+        $this->_listTotal = count($tickets);
         if ($tickets) {
             foreach ($tickets as $ticket) {
 
@@ -58,6 +60,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 $createdAt = $date->format('Y-m-d H:i:s');
 
                 $this->_list[] = array(
+                    'id_configuration' => $ticket->key,
                     'ticket_id' => $ticket->id,
                     'subject' => $ticket->subject,
                     'email' => '',

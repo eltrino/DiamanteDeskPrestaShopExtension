@@ -48,7 +48,10 @@ class DiamanteDesk extends Module
         $tab->module = $this->name;
         $tab->add();
         $install = parent::install();
+
         $this->registerHook('displayBackOfficeHeader');
+        $this->registerHook('displayBackOfficeTop');
+
         return $install;
     }
 
@@ -62,6 +65,7 @@ class DiamanteDesk extends Module
             }
         }
         $this->unregisterHook('displayBackOfficeHeader');
+        $this->unregisterHook('displayBackOfficeTop');
         return parent::uninstall();
     }
 
@@ -74,5 +78,13 @@ class DiamanteDesk extends Module
     public function hookDisplayBackOfficeHeader($params)
     {
         $this->context->controller->addCSS(dirname(__FILE__) . '/css/admin.css');
+    }
+
+    public function hookDisplayBackOfficeTop($params)
+    {
+        /** @var Smarty_Internal_Template $tpl */
+        $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/configuration.tpl');
+        $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
+        $tpl->display();
     }
 }
