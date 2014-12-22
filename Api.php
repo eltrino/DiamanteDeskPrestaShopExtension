@@ -17,6 +17,12 @@ class DiamanteDesk_Api
 
     public $result;
 
+    /** @var array */
+    protected $_postData = array();
+
+    /** @var string */
+    protected $_httpMethod = 'GET';
+
     /**
      * @return $this
      */
@@ -102,8 +108,10 @@ class DiamanteDesk_Api
     public function setHttpMethod($method)
     {
         if ($method == 'POST') {
+            $this->_httpMethod = 'POST';
             curl_setopt($this->_ch, CURLOPT_POST, 1);
         } elseif ($method == 'GET') {
+            $this->_httpMethod = 'GET';
             curl_setopt($this->_ch, CURLOPT_POST, 0);
         }
         return $this;
@@ -124,6 +132,18 @@ class DiamanteDesk_Api
      */
     public function doRequest()
     {
+
+        /** add post data before do request */
+        if ($this->_httpMethod == 'POST') {
+            $fieldsString = '';
+            foreach ($this->_postData as $key => $value) {
+                $fieldsString .= $key . '=' . $value . '&';
+            }
+            rtrim($fieldsString, '&');
+            curl_setopt($this->_ch, CURLOPT_POST, count($this->_postData));
+            curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $fieldsString);
+        }
+
         $result = curl_exec($this->_ch);
         if ($result) {
             $this->result = json_decode($result);
@@ -153,6 +173,42 @@ class DiamanteDesk_Api
         return $this->result;
     }
 
+    /**
+     * @return mixed
+     */
+    public function getUsers()
+    {
+        $this->init()
+            ->setMethod('users')
+            ->doRequest();
+
+        return $this->result;
+    }
+
+    public function saveTicket($data)
+    {
+        $data['source'] = 'web';
+
+        foreach ($data as $key => $value) {
+            $this->addPostData($key, $value);
+        }
+
+        $this->init()
+            ->setHttpMethod('POST')
+            ->setMethod('desk/tickets')
+            ->doRequest();
+
+        if ($this->result && isset($this->result->status) && $this->result->status == 'error') {
+            return false;
+        }
+        return true;
+
+    }
+
+    public function addPostData($key, $value)
+    {
+        $this->_postData[$key] = $value;
+    }
 
 }
 

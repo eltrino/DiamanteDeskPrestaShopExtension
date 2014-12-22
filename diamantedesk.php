@@ -5,6 +5,7 @@ if (!defined('_PS_VERSION_')) {
 
 include_once(dirname(__FILE__) . '/Api.php');
 include_once(dirname(__FILE__) . '/Config.php');
+include_once(dirname(__FILE__) . '/Ticket.php');
 
 class DiamanteDesk extends Module
 {
