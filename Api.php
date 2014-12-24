@@ -20,6 +20,12 @@ class DiamanteDesk_Api
     /** @var array */
     protected $_postData = array();
 
+    /** @var array */
+    protected $_getData = array();
+
+    /** @var string */
+    protected $_url = '';
+
     /** @var string */
     protected $_httpMethod = 'GET';
 
@@ -59,7 +65,6 @@ class DiamanteDesk_Api
     public function initCurl()
     {
         $this->_ch = curl_init();
-        curl_setopt($this->_ch, CURLOPT_HEADER, true);
         curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($this->_ch, CURLOPT_HEADER, false);
         return $this;
@@ -123,7 +128,8 @@ class DiamanteDesk_Api
      */
     public function setMethod($method)
     {
-        curl_setopt($this->_ch, CURLOPT_URL, trim($this->_config['serverAddress'], '/') . static::API_URL_POSTFIX . $method . '.' . static::API_RESPONSE_FORMAT);
+        $this->_url = trim($this->_config['serverAddress'], '/') . static::API_URL_POSTFIX . $method . '.' . static::API_RESPONSE_FORMAT;
+        curl_setopt($this->_ch, CURLOPT_URL, $this->_url);
         return $this;
     }
 
@@ -142,6 +148,17 @@ class DiamanteDesk_Api
             rtrim($fieldsString, '&');
             curl_setopt($this->_ch, CURLOPT_POST, count($this->_postData));
             curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $fieldsString);
+        }
+
+        /** add get parameters to uri before request */
+        if ($this->_httpMethod == 'GET') {
+            $fieldsString = '';
+            foreach ($this->_getData as $key => $value) {
+                $fieldsString .= $key . '=' . $value . '&';
+            }
+            rtrim($fieldsString, '&');
+            $this->_url = $this->_url . '?' . $fieldsString;
+            curl_setopt($this->_ch, CURLOPT_URL, $this->_url);
         }
 
         $result = curl_exec($this->_ch);
@@ -185,9 +202,52 @@ class DiamanteDesk_Api
         return $this->result;
     }
 
+    public function getDefaultUser()
+    {
+        $this->init()
+            ->setMethod('user/filter')
+            ->setHttpMethod('GET')
+            ->addGetData('username', Configuration::get('DIAMANTEDESK_USERNAME'))
+            ->doRequest();
+
+        return $this->result;
+    }
+
     public function saveTicket($data)
     {
         $data['source'] = 'web';
+
+        if (!isset($data['status'])) {
+            $data['status'] = 'new';
+        }
+
+        if (!isset($data['priority'])) {
+            $data['priority'] = 'low';
+        }
+
+        if (!isset($data['branch'])) {
+            $data['branch'] = Configuration::get('DIAMANTEDESK_DEFAULT_BRANCH');
+        }
+
+        if (!isset($data['reporter'])) {
+            $user = $this->getDefaultUser();
+            if ($user instanceof stdClass) {
+                $data['reporter'] = $user->id;
+            }
+        }
+
+        if ($data['reporter'] == (int)($data['reporter'])) {
+            $data['reporter'] = 'oro_' . $data['reporter'];
+        }
+
+        if (!isset($data['assignee'])) {
+            $branches = $this->getBranches();
+            foreach ($branches as $branch) {
+                if ($branch->id == (int)$data['branch']) {
+                    $data['assignee'] = $branch->default_assignee;
+                }
+            }
+        }
 
         foreach ($data as $key => $value) {
             $this->addPostData($key, $value);
@@ -205,9 +265,26 @@ class DiamanteDesk_Api
 
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
     public function addPostData($key, $value)
     {
         $this->_postData[$key] = $value;
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function addGetData($key, $value)
+    {
+        $this->_getData[$key] = $value;
+        return $this;
     }
 
 }

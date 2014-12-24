@@ -52,6 +52,8 @@ class DiamanteDesk extends Module
 
         $this->registerHook('displayBackOfficeHeader');
         $this->registerHook('displayBackOfficeTop');
+        $this->registerHook('customerAccount');
+        $this->registerHook('displayMyAccountBlock');
 
         return $install;
     }
@@ -67,6 +69,9 @@ class DiamanteDesk extends Module
         }
         $this->unregisterHook('displayBackOfficeHeader');
         $this->unregisterHook('displayBackOfficeTop');
+        $this->unregisterHook('customerAccount');
+        $this->unregisterHook('displayMyAccountBlock');
+
         return parent::uninstall();
     }
 
@@ -87,5 +92,15 @@ class DiamanteDesk extends Module
         $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/configuration.tpl');
         $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
         $tpl->display();
+    }
+
+    public function hookCustomerAccount($params)
+    {
+        return $this->display(dirname(__FILE__), '/views/my-account.tpl');
+    }
+
+    public function hookDisplayMyAccountBlock($params)
+    {
+        return $this->hookCustomerAccount($params);
     }
 }
