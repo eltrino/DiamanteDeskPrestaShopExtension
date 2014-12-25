@@ -14,9 +14,24 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 
     public function initContent()
     {
+
+        if ($_GET['ticket']) {
+            $this->initTicketContent();
+            return;
+        }
+
         if (Tools::isSubmit('submitTicket')) {
             Tools::safePostVars();
-            getDiamanteDeskApi()->saveTicket($_POST);
+
+            if (!$_POST['subject'] || !$_POST['description']) {
+                $this->errors[] = 'All fields are required. Please fill all fields and try again.';
+            } else {
+                if (!getDiamanteDeskApi()->saveTicket($_POST)) {
+                    $this->errors[] = 'Something went wrong. Please try again later or contact us';
+                } else {
+                    $this->context->smarty->assign('success', 'Ticket was successfully created.');
+                }
+            }
         }
 
         $this->display_column_left = false;
@@ -39,5 +54,48 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         ));
 
         $this->setTemplate('mytickets.tpl');
+    }
+
+    public function initTicketContent()
+    {
+
+        if (Tools::isSubmit('submitComment')) {
+            Tools::safePostVars();
+            if (!$_POST['comment']) {
+                $this->errors[] = 'All fields are required. Please fill all fields and try again.';
+            } else {
+                $api = getDiamanteDeskApi();
+                $data = $_POST;
+                $data['content'] = $data['comment'];
+                $data['author'] = 'test';
+                if (!getDiamanteDeskApi()->addComment($data)) {
+                    $this->errors[] = 'Something went wrong. Please try again later or contact us';
+                } else {
+                    $this->context->smarty->assign('success', 'Ticket was successfully created.');
+                }
+            }
+        }
+
+        $this->display_column_left = false;
+        $this->display_column_right = false;
+
+        parent::initContent();
+
+        $api = getDiamanteDeskApi();
+
+        $ticket = $api->getTicket((int)$_GET['ticket']);
+
+        if ($ticket && $ticket->comments) {
+            foreach ($ticket->comments as &$comment) {
+                $comment->authorData = $api->getUserById($comment->author);
+                $comment->created_at = date("U", strtotime($comment->created_at));
+            }
+        }
+
+        $this->context->smarty->assign(array(
+            'ticket' => $ticket
+        ));
+
+        $this->setTemplate('ticket.tpl');
     }
 }

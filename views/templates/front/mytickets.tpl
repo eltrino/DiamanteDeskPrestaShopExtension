@@ -6,6 +6,9 @@
     <span class="navigation_page">{l s='My Tickets'}</span>
 {/capture}
 {include file="$tpl_dir./errors.tpl"}
+{if isset($success)}
+    <p class="success">{$success}</p>
+{/if}
 <h1 class="page-heading bottom-indent">{l s='My Tickets'}</h1>
 <p class="info-title">{l s='Here are the tickets you\'ve submited since your account was created.'}</p>
 <div class="block-center" id="block-history">
@@ -40,7 +43,7 @@
                         {$ticket->status}
                     </td>
                     <td>
-                        <a href="{$diamantedesk_url}/desk/tickets/view/{$ticket->key}" target="_blank">View</a>
+                        <a href="?ticket={$ticket->id}">View</a>
                     </td>
                 </tr>
             {/foreach}
@@ -61,13 +64,13 @@
 <div class="box" id="ticket_form" style="display: none;">
     <form method="post" class="std" id="add_ticket">
         <div class="required form-group">
-            <label for="subject">{l s='Subject'} <sup>*</sup></label>
+            <label for="subject">{l s='Subject'}<sup>*</sup></label>
             <input class="is_required validate form-control" data-validate="{$address_validation.$field_name.validate}"
                    type="text" name="subject" id="subject"
                    value="{if isset($smarty.post.subject)}{$smarty.post.subject}{else}{/if}"/>
         </div>
-        <div class="form-group">
-            <label for="description">{l s='Description'}</label>
+        <div class="form-group required">
+            <label for="description">{l s='Description'}<sup>*</sup></label>
             <textarea class="validate form-control" id="description" name="description" cols="26"
                       rows="3">{if isset($smarty.post.description)}{$smarty.post.description}{/if}</textarea>
         </div>

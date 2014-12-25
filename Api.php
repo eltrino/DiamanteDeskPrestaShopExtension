@@ -191,6 +191,18 @@ class DiamanteDesk_Api
     }
 
     /**
+     * @param $ticketId
+     * @return mixed
+     */
+    public function getTicket($ticketId)
+    {
+        $this->init()
+            ->setMethod('desk/tickets/' . $ticketId)
+            ->doRequest();
+        return $this->result;
+    }
+
+    /**
      * @return mixed
      */
     public function getUsers()
@@ -209,6 +221,45 @@ class DiamanteDesk_Api
             ->setHttpMethod('GET')
             ->addGetData('username', Configuration::get('DIAMANTEDESK_USERNAME'))
             ->doRequest();
+
+        return $this->result;
+    }
+
+    public function getUserById($id)
+    {
+        $this->init()
+            ->setMethod('users/' . $id)
+            ->setHttpMethod('GET')
+            ->doRequest();
+
+        return $this->result;
+    }
+
+    /**
+     * @param $data = {
+     *      content
+     *      ticket
+     *      author
+     *      ticketStatus
+     * }
+     *
+     * @return mixed
+     */
+    public function addComment($data)
+    {
+        $this->init()
+            ->setMethod('desk/comments')
+            ->setHttpMethod('POST');
+
+        foreach ($data as $key => $value) {
+            $this->addPostData($key, $value);
+        }
+
+        $this->doRequest();
+
+        if ($this->result && isset($this->result->status) && $this->result->status == 'error') {
+            return false;
+        }
 
         return $this->result;
     }
