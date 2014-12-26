@@ -67,7 +67,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 $api = getDiamanteDeskApi();
                 $data = $_POST;
                 $data['content'] = $data['comment'];
-                $data['author'] = 'test';
+                $data['author'] = 'admin';
                 if (!getDiamanteDeskApi()->addComment($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {

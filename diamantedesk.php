@@ -6,9 +6,12 @@ if (!defined('_PS_VERSION_')) {
 include_once(dirname(__FILE__) . '/Api.php');
 include_once(dirname(__FILE__) . '/Config.php');
 include_once(dirname(__FILE__) . '/Ticket.php');
+include_once(dirname(__FILE__) . '/OrderRelation.php');
 
 class DiamanteDesk extends Module
 {
+    const INSTALL_SQL_FILE = 'install.sql';
+
     public function __construct()
     {
         $this->name = 'diamantedesk';
@@ -31,8 +34,21 @@ class DiamanteDesk extends Module
 
     }
 
-    public function install()
+    public function install($keep = true)
     {
+        if ($keep) {
+            if (!file_exists(dirname(__FILE__) . '/' . self::INSTALL_SQL_FILE))
+                return false;
+            else if (!$sql = file_get_contents(dirname(__FILE__) . '/' . self::INSTALL_SQL_FILE))
+                return false;
+            $sql = str_replace(array('PREFIX_', 'ENGINE_TYPE'), array(_DB_PREFIX_, _MYSQL_ENGINE_), $sql);
+            $sql = preg_split("/;\s*[\r\n]+/", trim($sql));
+
+            foreach ($sql as $query)
+                if (!Db::getInstance()->execute(trim($query)))
+                    return false;
+        }
+
         $parentTab = new Tab();
         // Need a foreach for the language
         $parentTab->name[$this->context->language->id] = $this->l('DiamanteDesk');
@@ -54,6 +70,7 @@ class DiamanteDesk extends Module
         $this->registerHook('displayBackOfficeTop');
         $this->registerHook('customerAccount');
         $this->registerHook('displayMyAccountBlock');
+        $this->registerHook('displayOrderDetail');
 
         return $install;
     }
@@ -71,6 +88,7 @@ class DiamanteDesk extends Module
         $this->unregisterHook('displayBackOfficeTop');
         $this->unregisterHook('customerAccount');
         $this->unregisterHook('displayMyAccountBlock');
+        $this->unregisterHook('displayOrderDetail');
 
         return parent::uninstall();
     }
@@ -102,5 +120,23 @@ class DiamanteDesk extends Module
     public function hookDisplayMyAccountBlock($params)
     {
         return $this->hookCustomerAccount($params);
+    }
+
+    public function hookDisplayOrderDetail($params)
+    {
+        $relation = new DiamanteDesk_OrderRelation();
+        $ticketsIds = $relation->getRelatedTickets($params['order']->id);
+        $relatedTickets = array();
+
+        //TODO: should be based on API filter
+        $tickets = getDiamanteDeskApi()->getTickets();
+        foreach ($tickets as $ticket) {
+            if (in_array($ticket->id, $ticketsIds)) {
+                $relatedTickets[] = $ticket;
+            }
+        }
+
+        $this->smarty->assign('related_tickets', $relatedTickets);
+        return $this->display(dirname(__FILE__), '/views/orderdetails.tpl');
     }
 }

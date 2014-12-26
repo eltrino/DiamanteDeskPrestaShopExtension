@@ -312,6 +312,12 @@ class DiamanteDesk_Api
         if ($this->result && isset($this->result->status) && $this->result->status == 'error') {
             return false;
         }
+
+        if (isset($data['id_order'])) {
+            $relationModel = new DiamanteDesk_OrderRelation();
+            $relationModel->saveRelation($this->result->id, $data['id_order']);
+        }
+
         return true;
 
     }
