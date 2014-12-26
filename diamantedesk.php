@@ -109,7 +109,7 @@ class DiamanteDesk extends Module
         /** @var Smarty_Internal_Template $tpl */
         $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/configuration.tpl');
         $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
-        $tpl->display();
+        return $tpl->fetch();
     }
 
     public function hookCustomerAccount($params)
