@@ -67,11 +67,10 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 $api = getDiamanteDeskApi();
                 $data = $_POST;
                 $data['content'] = $data['comment'];
-                $data['author'] = 'admin';
                 if (!getDiamanteDeskApi()->addComment($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
-                    $this->context->smarty->assign('success', 'Ticket was successfully created.');
+                    $this->context->smarty->assign('success', 'Comment successfully added');
                 }
             }
         }

@@ -71,6 +71,7 @@ class DiamanteDesk extends Module
         $this->registerHook('customerAccount');
         $this->registerHook('displayMyAccountBlock');
         $this->registerHook('displayOrderDetail');
+        $this->registerHook('actionDispatcher');
 
         return $install;
     }
@@ -89,6 +90,7 @@ class DiamanteDesk extends Module
         $this->unregisterHook('customerAccount');
         $this->unregisterHook('displayMyAccountBlock');
         $this->unregisterHook('displayOrderDetail');
+        $this->unregisterHook('actionDispatcher');
 
         return parent::uninstall();
     }
@@ -122,6 +124,13 @@ class DiamanteDesk extends Module
         return $this->hookCustomerAccount($params);
     }
 
+    /**
+     * Add submit ticket form & related tickets list
+     * To customer order view page
+     *
+     * @param $params
+     * @return string
+     */
     public function hookDisplayOrderDetail($params)
     {
         $relation = new DiamanteDesk_OrderRelation();
@@ -138,5 +147,32 @@ class DiamanteDesk extends Module
 
         $this->smarty->assign('related_tickets', $relatedTickets);
         return $this->display(dirname(__FILE__), '/views/orderdetails.tpl');
+    }
+
+
+    /**
+     * Hook for submit ticket to DiamanteDesk when
+     * customer use standard PrestaShop "contact-us" form
+     *
+     * @param $params
+     */
+    public function hookActionDispatcher($params)
+    {
+        if ($params['controller_class'] === 'ContactController' && Tools::isSubmit('submitMessage')) {
+
+            /** @var DiamanteDesk_Api $api */
+            $api = getDiamanteDeskApi();
+
+            $data = array(
+                'subject' => mb_substr($_POST['message'], 0, 15) . '...',
+                'description' => $_POST['message']
+            );
+
+            if (isset($_POST['id_order']) && $_POST['id_order']) {
+                $data['id_order'] = $_POST['id_order'];
+            }
+
+            $api->saveTicket($data);
+        }
     }
 }

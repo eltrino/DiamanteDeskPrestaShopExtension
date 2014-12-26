@@ -247,6 +247,10 @@ class DiamanteDesk_Api
      */
     public function addComment($data)
     {
+        if (!isset($data['author'])) {
+            $data['author'] = 'oro_' . $this->getDefaultUser()->id;
+        }
+
         $this->init()
             ->setMethod('desk/comments')
             ->setHttpMethod('POST');

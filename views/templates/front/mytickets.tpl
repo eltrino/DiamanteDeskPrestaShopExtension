@@ -7,7 +7,7 @@
 {/capture}
 {include file="$tpl_dir./errors.tpl"}
 {if isset($success)}
-    <p class="success">{$success}</p>
+    <p class="alert alert-success">{$success}</p>
 {/if}
 <h1 class="page-heading bottom-indent">{l s='My Tickets'}</h1>
 <p class="info-title">{l s='Here are the tickets you\'ve submited since your account was created.'}</p>

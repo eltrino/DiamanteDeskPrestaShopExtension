@@ -12,7 +12,7 @@
 {/capture}
 {include file="$tpl_dir./errors.tpl"}
 {if isset($success)}
-    <p class="success">{$success}</p>
+    <p class="alert alert-success">{$success}</p>
 {/if}
 <h1 class="page-heading bottom-indent">{l s='View ticket:'} {$ticket->key}</h1>
 <div class="block-center" id="block-history">
