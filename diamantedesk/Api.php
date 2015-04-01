@@ -30,6 +30,8 @@ class DiamanteDesk_Api
 
     public $result;
 
+    public $resultHeaders;
+
     /** @var array */
     protected $_postData = array();
 
@@ -77,9 +79,12 @@ class DiamanteDesk_Api
      */
     public function initCurl()
     {
+        if ($this->_ch) {
+            return $this;
+        }
         $this->_ch = curl_init();
         curl_setopt($this->_ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($this->_ch, CURLOPT_HEADER, false);
+        curl_setopt($this->_ch, CURLOPT_HEADER, true);
         return $this;
     }
 
@@ -169,14 +174,23 @@ class DiamanteDesk_Api
             foreach ($this->_getData as $key => $value) {
                 $fieldsString .= $key . '=' . $value . '&';
             }
-            rtrim($fieldsString, '&');
+            $fieldsString = rtrim($fieldsString, '&');
             $this->_url = $this->_url . '?' . $fieldsString;
             curl_setopt($this->_ch, CURLOPT_URL, $this->_url);
         }
 
         $result = curl_exec($this->_ch);
-        if ($result) {
-            $this->result = json_decode($result);
+
+        $header_size = curl_getinfo($this->_ch, CURLINFO_HEADER_SIZE);
+        $header = substr($result, 0, $header_size);
+        $body = substr($result, $header_size);
+
+        if ($header) {
+            $this->resultHeaders = http_parse_headers($header);
+        }
+
+        if ($body) {
+            $this->result = json_decode($body);
         }
         return $this;
     }
@@ -361,6 +375,17 @@ class DiamanteDesk_Api
         return $this;
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return $this
+     */
+    public function addFilter($key, $value)
+    {
+        $this->addGetData($key, $value);
+        return $this;
+    }
+
 }
 
 /**
@@ -369,4 +394,28 @@ class DiamanteDesk_Api
 function getDiamanteDeskApi()
 {
     return new DiamanteDesk_Api();
+}
+
+if (!function_exists('http_parse_headers')) {
+    function http_parse_headers($header)
+    {
+        $retVal = array();
+        $fields = explode("\r\n", preg_replace('/\x0D\x0A[\x09\x20]+/', ' ', $header));
+        foreach ($fields as $field) {
+            if (preg_match('/([^:]+): (.+)/m', $field, $match)) {
+                $match[1] = preg_replace('/(?<=^|[\x09\x20\x2D])./e', 'strtoupper("\0")', strtolower(trim($match[1])));
+                if (isset($retVal[$match[1]])) {
+                    if (is_array($retVal[$match[1]])) {
+                        $i = count($retVal[$match[1]]);
+                        $retVal[$match[1]][$i] = $match[2];
+                    } else {
+                        $retVal[$match[1]] = array($retVal[$match[1]], $match[2]);
+                    }
+                } else {
+                    $retVal[$match[1]] = trim($match[2]);
+                }
+            }
+        }
+        return $retVal;
+    }
 }

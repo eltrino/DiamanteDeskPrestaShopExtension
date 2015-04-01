@@ -15,6 +15,19 @@
  */
 class AdminDiamanteDeskController extends ModuleAdminController
 {
+    const TOTAL_RESULT_HEADER = 'X-Total';
+
+    /** @var DiamanteDesk_Api */
+    protected $_api;
+
+    protected function _init()
+    {
+        if (!$this->_api) {
+            $this->_api = getDiamanteDeskApi();
+            $this->_api->init();
+        }
+    }
+
     public function __construct()
     {
         $this->bootstrap = true;
@@ -62,10 +75,11 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     public function getList($id_lang, $order_by = null, $order_way = null, $start = 0, $limit = null, $id_lang_shop = false)
     {
+        $this->_init();
         $this->addJs(_MODULE_DIR_ . $this->module->name . '/js/blankLink.js');
-        $tickets = getDiamanteDeskApi()->getTickets();
+        $tickets = $this->_api->getTickets();
         $this->_list = array();
-        $this->_listTotal = count($tickets);
+        $this->_listTotal = $this->_api->resultHeaders[static::TOTAL_RESULT_HEADER];
         if ($tickets) {
             foreach ($tickets as $ticket) {
 
@@ -87,10 +101,9 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     public function renderForm()
     {
-        $api = getDiamanteDeskApi();
-        $branches = $api->getBranches();
-        $users = $api->getUsers();
-
+        $this->_init();
+        $branches = $this->_api->getBranches();
+        $users = $this->_api->getUsers();
 
         $listBranches = array();
         if ($branches) {
@@ -191,9 +204,28 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     public function processAdd()
     {
-        $api = getDiamanteDeskApi();
-        if (!$api->saveTicket($_POST)) {
+        $this->_init();
+        if (!$this->_api->saveTicket($_POST)) {
             $this->errors[] = 'Error was occurred.';
         }
+    }
+
+    public function processFilter()
+    {
+        $this->_init();
+        $this->_applyPageSize();
+        $this->_applyPage();
+    }
+
+    protected function _applyPageSize()
+    {
+        $pageSize = $_POST['configuration_pagination'] ? $_POST['configuration_pagination'] : $this->_default_pagination;
+        $this->_api->addFilter('limit', $pageSize);
+    }
+
+    protected function _applyPage()
+    {
+        $page = $_POST['submitFilterconfiguration'] ? $_POST['submitFilterconfiguration'] : 1;
+        $this->_api->addFilter('page', $page);
     }
 }
