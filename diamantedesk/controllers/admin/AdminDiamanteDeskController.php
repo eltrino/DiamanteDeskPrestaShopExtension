@@ -39,7 +39,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
         $this->context = Context::getContext();
         $this->fields_list = array(
-            'ticket_id' => array(
+            'id' => array(
                 'title' => $this->l('ID'),
                 'align' => 'center',
                 'class' => 'fixed-width-xs'
@@ -49,8 +49,11 @@ class AdminDiamanteDeskController extends ModuleAdminController
             ),
             'email' => array(
                 'title' => $this->l('Email'),
+                'orderby' => false,
+                'filter' => false,
+                'search' => false,
             ),
-            'created_at' => array(
+            'createdAt' => array(
                 'title' => $this->l('Created At'),
                 'type' => 'datetime',
             ),
@@ -88,10 +91,10 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
                 $this->_list[] = array(
                     'id_configuration' => $ticket->key,
-                    'ticket_id' => $ticket->id,
+                    'id' => $ticket->id,
                     'subject' => $ticket->subject,
                     'email' => '',
-                    'created_at' => $createdAt,
+                    'createdAt' => $createdAt,
                     'priority' => $ticket->priority,
                     'status' => $ticket->status,
                 );
@@ -215,6 +218,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
         $this->_init();
         $this->_applyPageSize();
         $this->_applyPage();
+        $this->_applySorting();
     }
 
     protected function _applyPageSize()
@@ -227,5 +231,19 @@ class AdminDiamanteDeskController extends ModuleAdminController
     {
         $page = $_POST['submitFilterconfiguration'] ? $_POST['submitFilterconfiguration'] : 1;
         $this->_api->addFilter('page', $page);
+    }
+
+    protected function _applySorting()
+    {
+        $attribute = $_GET['configurationOrderby'] ? $_GET['configurationOrderby'] : null;
+        $dir = $_GET['configurationOrderway'] ? $_GET['configurationOrderway'] : null;
+
+        if (!$attribute || !$dir) {
+            return;
+        }
+
+        $this->_api
+            ->addFilter('sort', $attribute)
+            ->addFilter('order', strtoupper($dir));
     }
 }
