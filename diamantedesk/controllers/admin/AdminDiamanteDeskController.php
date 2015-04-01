@@ -42,7 +42,9 @@ class AdminDiamanteDeskController extends ModuleAdminController
             'id' => array(
                 'title' => $this->l('ID'),
                 'align' => 'center',
-                'class' => 'fixed-width-xs'
+                'class' => 'fixed-width-xs',
+                'filter' => false,
+                'search' => false
             ),
             'subject' => array(
                 'title' => $this->l('Subject')
@@ -61,11 +63,32 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 'title' => $this->l('Priority'),
                 'align' => 'center',
                 'class' => 'fixed-width-sm',
+                'color' => 'color',
+                'type' => 'select',
+                'list' => array(
+                    'low' => 'Low',
+                    'medium' => 'Medium',
+                    'high' => 'High',
+                ),
+                'filter_key' => 'priority',
+                'order_key' => 'priority'
             ),
             'status' => array(
                 'title' => $this->l('Status'),
                 'align' => 'center',
                 'class' => 'fixed-width-sm',
+                'color' => 'color',
+                'type' => 'select',
+                'list' => array(
+                    'new' => 'New',
+                    'open' => 'Open',
+                    'pending' => 'Pending',
+                    'in_progress' => 'In progress',
+                    'closed' => 'closed',
+                    'on_hold' => 'On hold',
+                ),
+                'filter_key' => 'status',
+                'order_key' => 'status'
             ),
         );
         parent::__construct();
@@ -219,6 +242,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
         $this->_applyPageSize();
         $this->_applyPage();
         $this->_applySorting();
+        $this->_applyFilters();
     }
 
     protected function _applyPageSize()
@@ -245,5 +269,33 @@ class AdminDiamanteDeskController extends ModuleAdminController
         $this->_api
             ->addFilter('sort', $attribute)
             ->addFilter('order', strtoupper($dir));
+    }
+
+    protected function _applyFilters()
+    {
+        if (!isset($_POST)) {
+            return;
+        }
+
+        foreach ($_POST as $key => $value) {
+
+            if (!$value) {
+                continue;
+            }
+
+            $arr = explode('_', $key);
+
+            if (count($arr) != 2) {
+                continue;
+            }
+
+            if ($arr[0] != 'configurationFilter') {
+                continue;
+            }
+
+            $this->_api->addFilter($arr[1], $value);
+
+        }
+
     }
 }
