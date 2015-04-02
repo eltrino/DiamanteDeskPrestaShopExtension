@@ -163,7 +163,7 @@ class DiamanteDesk_Api
             foreach ($this->_postData as $key => $value) {
                 $fieldsString .= $key . '=' . $value . '&';
             }
-            rtrim($fieldsString, '&');
+            $fieldsString = rtrim($fieldsString, '&');
             curl_setopt($this->_ch, CURLOPT_POST, count($this->_postData));
             curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $fieldsString);
         }
@@ -175,7 +175,9 @@ class DiamanteDesk_Api
                 $fieldsString .= $key . '=' . $value . '&';
             }
             $fieldsString = rtrim($fieldsString, '&');
-            $this->_url = $this->_url . '?' . $fieldsString;
+            if ($fieldsString) {
+                $this->_url = $this->_url . '?' . $fieldsString;
+            }
             curl_setopt($this->_ch, CURLOPT_URL, $this->_url);
         }
 
@@ -325,6 +327,9 @@ class DiamanteDesk_Api
         if (!isset($data['assignee'])) {
             $branches = $this->getBranches();
             foreach ($branches as $branch) {
+                if (!$data['branch']) {
+                    $data['branch'] = $branch->id;
+                }
                 if ($branch->id == (int)$data['branch']) {
                     $data['assignee'] = $branch->default_assignee;
                 }
