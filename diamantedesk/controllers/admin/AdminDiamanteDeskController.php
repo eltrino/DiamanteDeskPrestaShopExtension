@@ -302,12 +302,12 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 list($from, $to) = $value;
 
                 if ($from) {
-                    $from = new DateTime($from);
+                    $from = new DateTime($from, new DateTimezone('UTC'))    ;
                     $this->_api->addFilter(static::API_DATE_FROM_VALUE, $from->format(DateTime::ISO8601));
                 }
 
                 if ($to) {
-                    $to = new DateTime($to);
+                    $to = new DateTime($to, new DateTimezone('UTC'));
                     $this->_api->addFilter(static::API_DATE_TO_VALUE, $to->format(DateTime::ISO8601));
                 }
             }
