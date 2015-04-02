@@ -28,7 +28,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
     public function initContent()
     {
 
-        if ($_GET['ticket']) {
+        if (isset($_GET['ticket'])) {
             $this->initTicketContent();
             return;
         }
