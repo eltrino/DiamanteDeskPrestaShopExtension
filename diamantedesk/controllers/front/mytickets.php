@@ -15,6 +15,9 @@
  */
 class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 {
+    const TICKETS_PER_PAGE = 25;
+    const TOTAL_RESULT_HEADER = 'X-Total';
+
     public $ssl = true;
     public $auth = true;
     public $page_name = 'My Tickets';
@@ -54,7 +57,15 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 
         $api = getDiamanteDeskApi();
 
+        // get pagination info
+        $currentPage = isset($_GET['p']) ? (int)$_GET['p'] : 1;
+        $ticketsPerPage = static::TICKETS_PER_PAGE;
+        $api->addFilter('page', $currentPage);
+        $api->addFilter('limit', $ticketsPerPage);
+
         $tickets = $api->getTickets();
+
+        $lastPage = ceil($api->resultHeaders[static::TOTAL_RESULT_HEADER] / static::TICKETS_PER_PAGE);
 
         /** format date */
         foreach ($tickets as $ticket) {
@@ -62,6 +73,11 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         }
 
         $this->context->smarty->assign(array(
+            'start' => 1,
+            'stop' => $lastPage,
+            'p' => $currentPage,
+            'range' => static::TICKETS_PER_PAGE,
+            'pages_nb' => $lastPage,
             'tickets' => $tickets,
             'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS')
         ));
