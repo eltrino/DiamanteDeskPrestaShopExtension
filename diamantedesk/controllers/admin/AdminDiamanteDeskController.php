@@ -236,7 +236,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
     public function processAdd()
     {
         $this->_init();
-        if (!$this->_api->saveTicket($_POST)) {
+        if (!$this->_api->createTicket($_POST)) {
             $this->errors[] = 'Error was occurred.';
         }
     }

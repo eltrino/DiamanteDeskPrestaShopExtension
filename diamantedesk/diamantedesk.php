@@ -190,7 +190,7 @@ class DiamanteDesk extends Module
                 $data['id_order'] = $_POST['id_order'];
             }
 
-            $api->saveTicket($data);
+            $api->createTicket($data);
         }
     }
 

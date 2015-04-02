@@ -295,7 +295,7 @@ class DiamanteDesk_Api
         return $this->result;
     }
 
-    public function saveTicket($data)
+    public function createTicket($data)
     {
         $data['source'] = 'web';
 

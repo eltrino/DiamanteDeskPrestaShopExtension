@@ -39,7 +39,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             if (!$_POST['subject'] || !$_POST['description']) {
                 $this->errors[] = 'All fields are required. Please fill all fields and try again.';
             } else {
-                if (!getDiamanteDeskApi()->saveTicket($_POST)) {
+                if (!getDiamanteDeskApi()->createTicket($_POST)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
                     $this->context->smarty->assign('success', 'Ticket was successfully created.');
