@@ -16,6 +16,11 @@
 class AdminDiamanteDeskController extends ModuleAdminController
 {
     const TOTAL_RESULT_HEADER = 'X-Total';
+    const CONFIGURATION_FILTER_VALUE = 'configurationFilter';
+    const CREATED_AT_FIELD = 'createdAt';
+
+    const API_DATE_FROM_VALUE = 'createdAfter';
+    const API_DATE_TO_VALUE = 'createdBefore';
 
     /** @var DiamanteDesk_Api */
     protected $_api;
@@ -274,7 +279,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
     protected function _applyFilters()
     {
         if (!isset($_POST)) {
-            return;
+            return $this;
         }
 
         foreach ($_POST as $key => $value) {
@@ -289,12 +294,31 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 continue;
             }
 
-            if ($arr[0] != 'configurationFilter') {
+            if ($arr[0] != static::CONFIGURATION_FILTER_VALUE) {
                 continue;
+            }
+
+            if (is_array($value) && $arr[1] == static::CREATED_AT_FIELD) {
+                list($from, $to) = $value;
+
+                if ($from) {
+                    $from = new DateTime($from);
+                    $this->_api->addFilter(static::API_DATE_FROM_VALUE, $from->format(DateTime::ISO8601));
+                }
+
+                if ($to) {
+                    $to = new DateTime($to);
+                    $this->_api->addFilter(static::API_DATE_TO_VALUE, $to->format(DateTime::ISO8601));
+                }
+            }
+
+            if (is_array($value)) {
+                return $this;
             }
 
             $this->_api->addFilter($arr[1], $value);
 
+            return $this;
         }
 
     }
