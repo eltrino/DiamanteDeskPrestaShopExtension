@@ -264,8 +264,8 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     protected function _applySorting()
     {
-        $attribute = $_GET['configurationOrderby'] ? $_GET['configurationOrderby'] : null;
-        $dir = $_GET['configurationOrderway'] ? $_GET['configurationOrderway'] : null;
+        $attribute = isset($_GET['configurationOrderby']) ? $_GET['configurationOrderby'] : null;
+        $dir = isset($_GET['configurationOrderway']) ? $_GET['configurationOrderway'] : null;
 
         if (!$attribute || !$dir) {
             return;
