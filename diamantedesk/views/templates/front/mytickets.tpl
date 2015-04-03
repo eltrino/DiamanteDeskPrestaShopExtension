@@ -58,7 +58,11 @@
                         {$ticket->status}
                     </td>
                     <td>
-                        <a href="?ticket={$ticket->id}">View</a>
+                        <a class="btn btn-default button button-small" href="?ticket={$ticket->id}">
+                            <span>
+                                {l s='View'}<i class="icon-chevron-right right"></i>
+                            </span>
+                        </a>
                     </td>
                 </tr>
             {/foreach}
