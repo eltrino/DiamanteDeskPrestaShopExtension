@@ -18,7 +18,7 @@ class DiamanteDesk_OrderRelation extends ObjectModel
 
     public $id;
 
-    public $ticket_id;
+    public $ticket_key;
 
     public $order_id;
 
@@ -29,7 +29,7 @@ class DiamanteDesk_OrderRelation extends ObjectModel
         'table' => 'diamantedesk_order_relation',
         'primary' => 'relation_id',
         'fields' => array(
-            'ticket_id' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true),
+            'ticket_key' => array('type' => self::TYPE_STRING, 'required' => true),
             'order_id' => array('type' => self::TYPE_INT, 'validate' => 'isUnsignedId', 'required' => true)
         )
     );
@@ -40,33 +40,33 @@ class DiamanteDesk_OrderRelation extends ObjectModel
     }
 
     /**
-     * @param $ticketId
+     * @param $ticketKey
      * @param $orderId
      * @return bool
      * @throws PrestaShopDatabaseException
      */
-    public function saveRelation($ticketId, $orderId)
+    public function saveRelation($ticketKey, $orderId)
     {
         return Db::getInstance()->insert('diamantedesk_order_relation',
             array(
-                'ticket_id' => (int)$ticketId,
+                'ticket_key' => $ticketKey,
                 'order_id' => (int)$orderId
             )
         );
     }
 
     /**
-     * @param $ticketId
+     * @param $ticketKey
      * @return array
      * @throws PrestaShopDatabaseException
      */
-    public function getRelatedOrders($ticketId)
+    public function getRelatedOrders($ticketKey)
     {
         /** @var PDOStatement $result */
         $result = Db::getInstance()->query('
 				SELECT `order_id`
 				FROM `' . _DB_PREFIX_ . 'diamantedesk_order_relation`
-				WHERE `ticket_id` = ' . (int)$ticketId);
+				WHERE `ticket_key` = ' . $ticketKey);
 
         return $result->fetchAll(PDO::FETCH_COLUMN);
     }
@@ -80,7 +80,7 @@ class DiamanteDesk_OrderRelation extends ObjectModel
     {
         /** @var PDOStatement $result */
         $result = Db::getInstance()->query('
-				SELECT `ticket_id`
+				SELECT `ticket_key`
 				FROM `' . _DB_PREFIX_ . 'diamantedesk_order_relation`
 				WHERE `order_id` = ' . (int)$orderId);
 

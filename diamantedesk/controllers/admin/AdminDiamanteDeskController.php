@@ -107,13 +107,21 @@ class AdminDiamanteDeskController extends ModuleAdminController
     public function getList($id_lang, $order_by = null, $order_way = null, $start = 0, $limit = null, $id_lang_shop = false)
     {
         $this->_init();
-        $this->addJs(_MODULE_DIR_ . $this->module->name . '/js/blankLink.js');
+        $this->addJS(_MODULE_DIR_ . $this->module->name . '/js/blankLink.js');
+
+        if ($defaultBranch = Configuration::get('DIAMANTEDESK_DEFAULT_BRANCH')) {
+            $this->_api->addFilter('branch', $defaultBranch);
+        }
+
         $tickets = $this->_api->getTickets();
         $this->_list = array();
-        $this->_listTotal = $this->_api->resultHeaders[static::TOTAL_RESULT_HEADER];
+
+        $this->_listTotal = isset($this->_api->resultHeaders[static::TOTAL_RESULT_HEADER])
+            ? $this->_api->resultHeaders[static::TOTAL_RESULT_HEADER]
+            : 0;
+
         if ($tickets) {
             foreach ($tickets as $ticket) {
-
                 $date = new DateTime($ticket->created_at);
                 $createdAt = $date->format('Y-m-d H:i:s');
 
@@ -252,13 +260,13 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     protected function _applyPageSize()
     {
-        $pageSize = $_POST['configuration_pagination'] ? $_POST['configuration_pagination'] : $this->_default_pagination;
+        $pageSize = isset($_POST['configuration_pagination']) ? $_POST['configuration_pagination'] : $this->_default_pagination;
         $this->_api->addFilter('limit', $pageSize);
     }
 
     protected function _applyPage()
     {
-        $page = $_POST['submitFilterconfiguration'] ? $_POST['submitFilterconfiguration'] : 1;
+        $page = isset($_POST['submitFilterconfiguration']) ? $_POST['submitFilterconfiguration'] : 1;
         $this->_api->addFilter('page', $page);
     }
 
@@ -302,7 +310,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 list($from, $to) = $value;
 
                 if ($from) {
-                    $from = new DateTime($from, new DateTimezone('UTC'))    ;
+                    $from = new DateTime($from, new DateTimezone('UTC'));
                     $this->_api->addFilter(static::API_DATE_FROM_VALUE, $from->format(DateTime::ISO8601));
                 }
 

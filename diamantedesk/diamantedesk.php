@@ -202,27 +202,20 @@ class DiamanteDesk extends Module
         /** @var DiamanteDesk_OrderRelation $relationModel */
         $relationModel = getOrderRelationModel();
 
-        $relatedTicketsIds = $relationModel->getRelatedTickets($params['id_order']);
-        $relatedTickets = array();
+        $relatedTicketsKeys = $relationModel->getRelatedTickets($params['id_order']);
 
-        /**
-         * TODO: should be implemented (filtered) through Api on DiamanteDesk side
-         */
-        if (count($relatedTicketsIds)) {
-            $tickets = $api->getTickets();
-            foreach ($tickets as $ticket) {
-                if (in_array($ticket->id, $relatedTicketsIds)) {
-                    $relatedTickets[] = $ticket;
-                }
-            }
+        foreach ($relatedTicketsKeys as $key) {
+            $api->addFilter('key', $key);
         }
+
+        $tickets = $api->getTickets();
 
 
         /** @var Smarty_Internal_Template $tpl */
         $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/viewOrder.tpl');
 
         $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
-        $tpl->assign('tickets', $relatedTickets);
+        $tpl->assign('tickets', $tickets);
 
         return $tpl->fetch();
     }

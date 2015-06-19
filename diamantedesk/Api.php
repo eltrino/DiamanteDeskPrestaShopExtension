@@ -19,6 +19,10 @@ class DiamanteDesk_Api
 
     const API_RESPONSE_FORMAT = 'json';
 
+    const TYPE_ORO_USER = 'oro_';
+
+    const TYPE_DIAMANTE_USER = 'diamante_';
+
     /** @var resource */
     protected $_ch;
 
@@ -59,7 +63,7 @@ class DiamanteDesk_Api
     /**
      * @param null $userName
      * @param null $apiKey
-     * @param null $serverAddress
+     * @param null $serverAddres
      * @return $this
      */
     public function initConfig($userName = null, $apiKey = null, $serverAddress = null)
@@ -351,7 +355,7 @@ class DiamanteDesk_Api
 
         if (isset($data['id_order'])) {
             $relationModel = getOrderRelationModel();
-            $relationModel->saveRelation($this->result->id, $data['id_order']);
+            $relationModel->saveRelation($this->result->key, $data['id_order']);
         }
 
         return true;
