@@ -15,4 +15,5 @@
  -->
 <script>
     DiamanteDesk_Server_Address = {$diamantedesk_server_address|@json_encode};
+    DiamanteDesk_Link_To_Admin  = 'desk/tickets/view/';
 </script>

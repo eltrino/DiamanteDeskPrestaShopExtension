@@ -63,13 +63,15 @@ class DiamanteDesk_Api
     /**
      * @param null $userName
      * @param null $apiKey
-     * @param null $serverAddres
+     * @param null $serverAddress
      * @return $this
      */
     public function initConfig($userName = null, $apiKey = null, $serverAddress = null)
     {
         /** Check is config already initialized */
-        if (count($this->_config)) return $this;
+        if (count($this->_config)) {
+            return $this;
+        }
 
         $this->_config['userName'] = $userName ? $userName : Configuration::get('DIAMANTEDESK_USERNAME');
         $this->_config['apiKey'] = $apiKey ? $apiKey : Configuration::get('DIAMANTEDESK_API_KEY');
@@ -217,6 +219,10 @@ class DiamanteDesk_Api
      */
     public function getTickets()
     {
+        if (!isset($this->_getData['limit'])) {
+            $this->addGetData('limit', 50);
+        }
+
         $this->init()
             ->setMethod('desk/tickets')
             ->doRequest();
@@ -328,14 +334,14 @@ class DiamanteDesk_Api
             $data['reporter'] = 'oro_' . $data['reporter'];
         }
 
-        if (!isset($data['assignee'])) {
+        if (!isset($data['assigner_id'])) {
             $branches = $this->getBranches();
             foreach ($branches as $branch) {
                 if (!$data['branch']) {
                     $data['branch'] = $branch->id;
                 }
                 if ($branch->id == (int)$data['branch']) {
-                    $data['assignee'] = $branch->default_assignee;
+                    $data['assigner_id'] = $branch->default_assignee;
                 }
             }
         }
@@ -349,7 +355,7 @@ class DiamanteDesk_Api
             ->setMethod('desk/tickets')
             ->doRequest();
 
-        if ($this->result && isset($this->result->status) && $this->result->status == 'error') {
+        if (!empty($this->result->error)) {
             return false;
         }
 

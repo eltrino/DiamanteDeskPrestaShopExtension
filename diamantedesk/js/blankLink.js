@@ -3,7 +3,7 @@ jQuery(document).ready(function () {
         var uri = jQuery(this).attr('href');
         var key = getParameterByName(uri, 'id_configuration');
         jQuery(this).attr('target', '_blank');
-        jQuery(this).attr('href', DiamanteDesk_Server_Address + '/#url=/desk/tickets/view/' + key);
+        jQuery(this).attr('href', DiamanteDesk_Server_Address + DiamanteDesk_Link_To_Admin + key);
     });
 });
 

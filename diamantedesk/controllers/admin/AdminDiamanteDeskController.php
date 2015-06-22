@@ -25,6 +25,48 @@ class AdminDiamanteDeskController extends ModuleAdminController
     /** @var DiamanteDesk_Api */
     protected $_api;
 
+    private static $_priorities = array(
+        array(
+            'name' => 'Low',
+            'priority_id' => 'low'
+        ),
+        array(
+            'name' => 'Medium',
+            'priority_id' => 'medium'
+        ),
+        array(
+            'name' => 'High',
+            'priority_id' => 'high'
+        ),
+    );
+
+    private static $_statuses = array(
+        array(
+            'name' => 'New',
+            'status_id' => 'new'
+        ),
+        array(
+            'name' => 'Open',
+            'status_id' => 'open'
+        ),
+        array(
+            'name' => 'Pending',
+            'status_id' => 'pending'
+        ),
+        array(
+            'name' => 'In Progress',
+            'status_id' => 'in_progress'
+        ),
+        array(
+            'name' => 'Closed',
+            'status_id' => 'closed'
+        ),
+        array(
+            'name' => 'On Hold',
+            'status_id' => 'on_hold1'
+        ),
+    );
+
     protected function _init()
     {
         if (!$this->_api) {
@@ -39,6 +81,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
         $this->className = 'Ticket';
         $this->lang = false;
+        $this->list_no_link = true;
 
         $this->addRowAction('view');
 
@@ -106,6 +149,29 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
     public function getList($id_lang, $order_by = null, $order_way = null, $start = 0, $limit = null, $id_lang_shop = false)
     {
+        Hook::exec('action'.$this->controller_name.'ListingFieldsModifier', array(
+            'select' => &$this->_select,
+            'join' => &$this->_join,
+            'where' => &$this->_where,
+            'group_by' => &$this->_group,
+            'order_by' => &$this->_orderBy,
+            'order_way' => &$this->_orderWay,
+            'fields' => &$this->fields_list,
+        ));
+
+        /* Determine offset from current page */
+        $start = 0;
+        if ((int)Tools::getValue('submitFilter'.$this->list_id))
+            $start = ((int)Tools::getValue('submitFilter'.$this->list_id) - 1) * $limit;
+        elseif (empty($start) && isset($this->context->cookie->{$this->list_id.'_start'}) && Tools::isSubmit('export'.$this->table))
+            $start = $this->context->cookie->{$this->list_id.'_start'};
+
+        // Either save or reset the offset in the cookie
+        if ($start)
+            $this->context->cookie->{$this->list_id.'_start'} = $start;
+        elseif (isset($this->context->cookie->{$this->list_id.'_start'}))
+            unset($this->context->cookie->{$this->list_id.'_start'});
+
         $this->_init();
         $this->addJS(_MODULE_DIR_ . $this->module->name . '/js/blankLink.js');
 
@@ -136,6 +202,11 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 );
             }
         }
+
+        Hook::exec('action'.$this->controller_name.'ListingResultsModifier', array(
+            'list' => &$this->_list,
+            'list_total' => &$this->_listTotal,
+        ));
     }
 
     public function renderForm()
@@ -186,18 +257,28 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'col' => '2'
                 ),
                 array(
-                    'type' => 'text',
+                    'type' => 'select',
                     'label' => $this->l('Priority'),
                     'name' => 'priority',
                     'required' => true,
-                    'col' => '2'
+                    'class' => 't',
+                    'options' => array(
+                        'query' => static::$_priorities,
+                        'id' => 'priority_id',
+                        'name' => 'name'
+                    )
                 ),
                 array(
-                    'type' => 'text',
+                    'type' => 'select',
                     'label' => $this->l('Status'),
                     'name' => 'status',
                     'required' => true,
-                    'col' => '2'
+                    'class' => 't',
+                    'options' => array(
+                        'query' => static::$_statuses,
+                        'id' => 'status_id',
+                        'name' => 'name'
+                    )
                 ),
                 array(
                     'type' => 'select',
