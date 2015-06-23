@@ -22,10 +22,16 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
     public $auth = true;
     public $page_name = 'My Tickets';
 
+    private $diamanteUsers = array();
+    private $oroUsers = array();
+
     public function __construct()
     {
         parent::__construct();
         $this->context = Context::getContext();
+        $api = getDiamanteDeskApi();
+        $this->diamanteUsers = $api->getDiamanteUsers();
+        $this->oroUsers = $api->getUsers();
     }
 
     public function initContent()
@@ -42,7 +48,11 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             if (!$_POST['subject'] || !$_POST['description']) {
                 $this->errors[] = 'All fields are required. Please fill all fields and try again.';
             } else {
-                if (!getDiamanteDeskApi()->createTicket($_POST)) {
+                $data = $_POST;
+                $api = getDiamanteDeskApi();
+                $diamanteUser = $api->getOrCreateDiamanteUser($this->context->customer);
+                $data['reporter'] = DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id;
+                if (!getDiamanteDeskApi()->createTicket($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
                     $this->context->smarty->assign('success', 'Ticket was successfully created.');
@@ -62,6 +72,11 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         $ticketsPerPage = static::TICKETS_PER_PAGE;
         $api->addFilter('page', $currentPage);
         $api->addFilter('limit', $ticketsPerPage);
+
+        $customer = $this->context->customer;
+        $diamanteUser = $api->getOrCreateDiamanteUser($customer);
+
+        $api->addFilter('reporter', DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id);
 
         $tickets = $api->getTickets();
 
@@ -96,6 +111,9 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 $api = getDiamanteDeskApi();
                 $data = $_POST;
                 $data['content'] = $data['comment'];
+                $customer = $this->context->customer;
+                $diamanteUser = $api->getOrCreateDiamanteUser($customer);
+                $data['author'] = DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id;
                 if (!getDiamanteDeskApi()->addComment($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
@@ -114,8 +132,8 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         $ticket = $api->getTicket((int)$_GET['ticket']);
 
         if ($ticket && $ticket->comments) {
-            foreach ($ticket->comments as &$comment) {
-                $comment->authorData = $api->getUserById($comment->author);
+            foreach ($ticket->comments as $comment) {
+                $comment->authorData = $this->getAuthor($comment);
                 $comment->created_at = date("U", strtotime($comment->created_at));
             }
         }
@@ -125,5 +143,29 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         ));
 
         $this->setTemplate('ticket.tpl');
+    }
+
+    /**
+     * @param $comment
+     * @return mixed
+     */
+    public function getAuthor($comment)
+    {
+        if ($comment->author_type . '_' == DiamanteDesk_Api::TYPE_DIAMANTE_USER) {
+            foreach ($this->diamanteUsers as $user) {
+                if ($comment->author == $user->id) {
+                    $userData = new \stdClass();
+                    $userData->firstName = $user->first_name;
+                    $userData->lastName = $user->last_name;
+                    return $userData;
+                }
+            }
+        } else {
+            foreach ($this->oroUsers as $user) {
+                if ($comment->author == $user->id) {
+                    return $user;
+                }
+            }
+        }
     }
 }

@@ -240,7 +240,12 @@ class DiamanteDesk extends Module
         /**
          * TODO: should be implemented (filtered) through Api on DiamanteDesk side
          */
-        if (count($relatedTicketsIds)) {
+        $customer = new Customer($params['id_customer']);
+        $diamanteUser = $api->getDiamanteUser($customer->email);
+
+        if (!$diamanteUser || count($relatedTicketsIds) == 0) {
+            $relatedTickets = array();
+        } else {
             $tickets = $api->getTickets();
             foreach ($tickets as $ticket) {
                 if (in_array($ticket->id, $relatedTicketsIds)) {

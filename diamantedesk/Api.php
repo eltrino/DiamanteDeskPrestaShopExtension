@@ -287,7 +287,7 @@ class DiamanteDesk_Api
     public function addComment($data)
     {
         if (!isset($data['author'])) {
-            $data['author'] = 'oro_' . $this->getDefaultUser()->id;
+            $data['author'] = static::TYPE_ORO_USER . $this->getDefaultUser()->id;
         }
 
         $this->init()
@@ -326,23 +326,7 @@ class DiamanteDesk_Api
         if (!isset($data['reporter'])) {
             $user = $this->getDefaultUser();
             if ($user instanceof stdClass) {
-                $data['reporter'] = $user->id;
-            }
-        }
-
-        if ($data['reporter'] == (int)($data['reporter'])) {
-            $data['reporter'] = 'oro_' . $data['reporter'];
-        }
-
-        if (!isset($data['assigner_id'])) {
-            $branches = $this->getBranches();
-            foreach ($branches as $branch) {
-                if (!$data['branch']) {
-                    $data['branch'] = $branch->id;
-                }
-                if ($branch->id == (int)$data['branch']) {
-                    $data['assigner_id'] = $branch->default_assignee;
-                }
+                $data['reporter'] = static::TYPE_ORO_USER . $user->id;
             }
         }
 
@@ -366,6 +350,75 @@ class DiamanteDesk_Api
 
         return true;
 
+    }
+
+    /**
+     * @param $email
+     * @return bool|mixed
+     */
+    public function getDiamanteUser($email)
+    {
+        try {
+            $this->init()
+                ->setMethod('desk/users/' . $email . '/')
+                ->doRequest();
+        } catch (Exception $e) {
+            return false;
+        }
+
+        if (!empty($this->result->error)) {
+            return false;
+        }
+
+        return $this->result;
+    }
+
+    public function getDiamanteUsers()
+    {
+        try {
+            $this->init()
+                ->setMethod('desk/users')
+                ->doRequest();
+        } catch (Exception $e) {
+            return false;
+        }
+
+        if (!empty($this->result->error)) {
+            return false;
+        }
+
+        return $this->result;
+    }
+
+    public function createDiamanteUser(Customer $customer)
+    {
+        try {
+            $this->init()
+                ->setMethod('desk/users')
+                ->setHttpMethod('POST')
+                ->addPostData('email', $customer->email)
+                ->addPostData('firstName', $customer->firstname)
+                ->addPostData('lastName', $customer->lastname)
+                ->doRequest();
+        } catch (Exception $e) {
+            return false;
+        }
+
+        if (!empty($this->result->error)) {
+            return false;
+        }
+
+        return $this->result;
+    }
+
+    public function getOrCreateDiamanteUser(Customer $customer)
+    {
+        $diamanteUser = $this->getDiamanteUser($customer->email);
+        if ($diamanteUser) {
+            return $diamanteUser;
+        }
+
+        return $this->createDiamanteUser($customer);
     }
 
     /**
@@ -408,7 +461,13 @@ class DiamanteDesk_Api
  */
 function getDiamanteDeskApi()
 {
-    return new DiamanteDesk_Api();
+    static $api = null;
+
+    if (!$api) {
+        $api = new DiamanteDesk_Api();
+    }
+
+    return $api;
 }
 
 if (!function_exists('http_parse_headers')) {
