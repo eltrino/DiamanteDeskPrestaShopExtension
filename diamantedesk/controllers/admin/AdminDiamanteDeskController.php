@@ -102,6 +102,8 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 'orderby' => false,
                 'filter' => false,
                 'search' => false,
+                'callback' => 'renderEmail', // If set, the return value of the defined method call will be used as the field content (optional).
+                'callback_object' => $this
             ),
             'createdAt' => array(
                 'title' => $this->l('Created At'),
@@ -418,6 +420,20 @@ class AdminDiamanteDeskController extends ModuleAdminController
 
             return $this;
         }
+
+    }
+
+    public function renderEmail($output, $row)
+    {
+        if (!$output) {
+            return;
+        }
+
+        $customer = new Customer;
+        $customer->getByEmail($row['email']);
+
+        $href = sprintf($this->context->link->getAdminLink('AdminCustomers') . '&id_customer=%d&viewcustomer', $customer->id);
+        return sprintf('<a href="%s" target="_blank">%s</a>', $href, $output);
 
     }
 }
