@@ -373,6 +373,9 @@ class DiamanteDesk_Api
         return $this->result;
     }
 
+    /**
+     * @return array
+     */
     public function getDiamanteUsers()
     {
         try {

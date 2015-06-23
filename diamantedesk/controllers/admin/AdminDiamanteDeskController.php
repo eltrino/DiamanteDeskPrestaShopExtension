@@ -186,8 +186,17 @@ class AdminDiamanteDeskController extends ModuleAdminController
             ? $this->_api->resultHeaders[static::TOTAL_RESULT_HEADER]
             : 0;
 
+        $diamanteUsers = $this->_api->getDiamanteUsers();
+
         if ($tickets) {
             foreach ($tickets as $ticket) {
+                $email = '';
+                foreach ($diamanteUsers as $user) {
+                    if (DiamanteDesk_Api::TYPE_DIAMANTE_USER .$user->id == $ticket->reporter){
+                        $email =$user->email;
+                    }
+                }
+
                 $date = new DateTime($ticket->created_at);
                 $createdAt = $date->format('Y-m-d H:i:s');
 
@@ -195,7 +204,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'id_configuration' => $ticket->key,
                     'id' => $ticket->id,
                     'subject' => $ticket->subject,
-                    'email' => '',
+                    'email' => $email,
                     'createdAt' => $createdAt,
                     'priority' => $ticket->priority,
                     'status' => $ticket->status,
