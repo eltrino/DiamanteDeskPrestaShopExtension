@@ -204,18 +204,22 @@ class DiamanteDesk extends Module
 
         $relatedTicketsKeys = $relationModel->getRelatedTickets($params['id_order']);
 
-        foreach ($relatedTicketsKeys as $key) {
-            $api->addFilter('key', $key);
+        $tickets = $this->getCustomerTickets($this->context->customer);
+
+        foreach ($tickets as $key => $ticket) {
+            if (!in_array($ticket->key, $relatedTicketsKeys)) {
+                unset ($tickets[$key]);
+            }
         }
-
-        $tickets = $api->getTickets();
-
 
         /** @var Smarty_Internal_Template $tpl */
         $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/viewOrder.tpl');
 
         $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
         $tpl->assign('tickets', $tickets);
+
+        $href = sprintf($this->context->link->getAdminLink('AdminCustomers') . '&id_customer=%d&viewcustomer', $this->context->customer->id);
+        $tpl->assign('email', sprintf('<a href="%s" target="_blank">%s</a>', $href, $this->context->customer->email));
 
         return $tpl->fetch();
     }
@@ -230,35 +234,35 @@ class DiamanteDesk extends Module
 
         $orders = Order::getCustomerOrders($params['id_customer'], true);
 
-        $relatedTickets = array();
         $relatedTicketsIds = array();
 
         foreach ($orders as $order) {
             $relatedTicketsIds = array_merge($relatedTicketsIds, $relationModel->getRelatedTickets($order['id_order']));
         }
 
-        /**
-         * TODO: should be implemented (filtered) through Api on DiamanteDesk side
-         */
         $customer = new Customer($params['id_customer']);
-        $diamanteUser = $api->getDiamanteUser($customer->email);
+        $tickets = $this->getCustomerTickets($customer);
 
-        if (!$diamanteUser || count($relatedTicketsIds) == 0) {
-            $relatedTickets = array();
-        } else {
-            $tickets = $api->getTickets();
-            foreach ($tickets as $ticket) {
-                if (in_array($ticket->id, $relatedTicketsIds)) {
-                    $relatedTickets[] = $ticket;
-                }
-            }
-        }
-
-        $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/viewOrder.tpl');
+        $tpl = $this->context->smarty->createTemplate(dirname(__FILE__) . '/views/templates/admin/diamante_desk/viewCustomer.tpl');
 
         $tpl->assign('diamantedesk_server_address', Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'));
-        $tpl->assign('tickets', $relatedTickets);
+        $tpl->assign('tickets', $tickets);
 
         return $tpl->fetch();
+    }
+
+    private function getCustomerTickets(Customer $customer)
+    {
+        $api = getDiamanteDeskApi();
+        $diamanteUser = $api->getDiamanteUser($customer->email);
+
+        if (!$diamanteUser) {
+            $tickets = array();
+        } else {
+            $api->addFilter('reporter', DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id);
+            $tickets = $api->getTickets();
+        }
+
+        return $tickets;
     }
 }

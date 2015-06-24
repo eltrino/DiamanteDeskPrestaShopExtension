@@ -27,7 +27,6 @@
                         <tr>
                             <th>{l s='Ticket Id'}</th>
                             <th>{l s='Subject'}</th>
-                            <th>{l s='Email'}</th>
                             <th>{l s='Date'}</th>
                             <th>{l s='Priority'}</th>
                             <th>{l s='Status'}</th>
@@ -42,9 +41,6 @@
                                 </td>
                                 <td class="bold">
                                     {$ticket->subject}
-                                </td>
-                                <td class="bold">
-                                    {$email}
                                 </td>
                                 <td>
                                     {$ticket->created_at|date_format:'%Y-%m-%d %H:%M:%S'}
