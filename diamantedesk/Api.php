@@ -464,13 +464,7 @@ class DiamanteDesk_Api
  */
 function getDiamanteDeskApi()
 {
-    static $api = null;
-
-    if (!$api) {
-        $api = new DiamanteDesk_Api();
-    }
-
-    return $api;
+    return new DiamanteDesk_Api();
 }
 
 if (!function_exists('http_parse_headers')) {
