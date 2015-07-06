@@ -224,7 +224,8 @@ class AdminDiamanteDeskController extends ModuleAdminController
     {
         $this->_init();
         $branches = $this->_api->getBranches();
-        $users = $this->_api->getUsers();
+        $oroUsers = $this->_api->addGetData('limit','999999')->getUsers();
+        $diamanteUsers = $this->_api->getDiamanteUsers();
 
         $listBranches = array();
         if ($branches) {
@@ -234,12 +235,38 @@ class AdminDiamanteDeskController extends ModuleAdminController
             }
         }
 
-        $listUsers = array();
-        if ($users) {
-            foreach ($users as $key => $user) {
-                $listUsers[$key]['user_id'] = (int)$user->id;
-                $listUsers[$key]['name'] = $user->firstName . ' ' . $user->lastName . ' (' . $user->email . ')';
+        $reporters = array();
+        $assigners = array();
+
+        foreach ($diamanteUsers as $user) {
+            $firstName = isset($user->first_name) ? $user->first_name : false;
+            $lastName  = isset($user->last_name)  ? $user->last_name  : false;
+            if (!$firstName && !$lastName) {
+                $reporters[] =
+                    array(
+                        'user_id' => DiamanteDesk_Api::TYPE_DIAMANTE_USER . $user->id,
+                        'name' => $user->email . ' [diamante]',
+                    );
+            } else {
+                $reporters[] =
+                    array(
+                        'user_id' => DiamanteDesk_Api::TYPE_DIAMANTE_USER . $user->id,
+                        'name' => $user->first_name . ' ' . $user->last_name . ' - ' . $user->email . ' [diamante]',
+                    );
             }
+        }
+
+        foreach ($oroUsers as $user) {
+            $reporters[] =
+                array(
+                    'user_id' => DiamanteDesk_Api::TYPE_ORO_USER . $user->id,
+                    'name' => $user->firstName . ' ' . $user->lastName . ' - ' . $user->email . ' [oro]',
+                );
+            $assigners[] =
+                array(
+                    'user_id' => $user->id,
+                    'name' => $user->firstName . ' ' . $user->lastName . ' - ' . $user->email
+                );
         }
 
         $this->fields_form = array(
@@ -299,7 +326,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'class' => 't',
                     'col' => '4',
                     'options' => array(
-                        'query' => $listUsers,
+                        'query' => $reporters,
                         'id' => 'user_id',
                         'name' => 'name'
                     )
@@ -312,7 +339,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'class' => 't',
                     'col' => '4',
                     'options' => array(
-                        'query' => $listUsers,
+                        'query' => $assigners,
                         'id' => 'user_id',
                         'name' => 'name'
                     )
@@ -338,6 +365,8 @@ class AdminDiamanteDeskController extends ModuleAdminController
         $this->_init();
         if (!$this->_api->createTicket($_POST)) {
             $this->errors[] = 'Error was occurred.';
+        } else {
+            $this->informations[] = 'Ticket was created';
         }
     }
 
