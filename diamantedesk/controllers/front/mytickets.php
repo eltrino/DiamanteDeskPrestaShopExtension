@@ -96,6 +96,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         $tickets = $api->getTickets();
 
         $lastPage = ceil($api->resultHeaders[static::TOTAL_RESULT_HEADER] / static::TICKETS_PER_PAGE);
+        $lastPage = $lastPage == 0 ? 1 : $lastPage;
 
         /** format date */
         foreach ($tickets as $ticket) {
