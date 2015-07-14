@@ -63,7 +63,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
         ),
         array(
             'name' => 'On Hold',
-            'status_id' => 'on_hold1'
+            'status_id' => 'on_hold'
         ),
     );
 
@@ -134,7 +134,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'open' => 'Open',
                     'pending' => 'Pending',
                     'in_progress' => 'In progress',
-                    'closed' => 'closed',
+                    'closed' => 'Closed',
                     'on_hold' => 'On hold',
                 ),
                 'filter_key' => 'status',

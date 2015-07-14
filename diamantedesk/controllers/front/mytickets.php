@@ -76,6 +76,21 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         $customer = $this->context->customer;
         $diamanteUser = $api->getOrCreateDiamanteUser($customer);
 
+        if (!$diamanteUser) {
+            $this->errors[] = 'Something went wrong. Please try again later or contact us';
+            $this->context->smarty->assign(array(
+                'start' => 1,
+                'stop' => 1,
+                'p' => $currentPage,
+                'range' => static::TICKETS_PER_PAGE,
+                'pages_nb' => 1,
+                'tickets' => array(),
+                'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS')
+            ));
+            $this->setTemplate('mytickets.tpl');
+            return;
+        }
+
         $api->addFilter('reporter', DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id);
 
         $tickets = $api->getTickets();

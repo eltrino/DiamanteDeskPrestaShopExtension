@@ -48,6 +48,8 @@ class DiamanteDesk_Api
     /** @var string */
     protected $_httpMethod = 'GET';
 
+    protected $_headers = array();
+
     /**
      * @return $this
      */
@@ -99,14 +101,10 @@ class DiamanteDesk_Api
      */
     public function setHeaders()
     {
-        curl_setopt(
-            $this->_ch,
-            CURLOPT_HTTPHEADER,
-            array(
-                'Accept: application/' . static::API_RESPONSE_FORMAT,
-                'Authorization: WSSE profile="UsernameToken"',
-                'X-WSSE: ' . $this->_getWsseHeader()
-            )
+        $this->_headers = array(
+            'Accept: application/' . static::API_RESPONSE_FORMAT,
+            'Authorization: WSSE profile="UsernameToken"',
+            'X-WSSE: ' . $this->_getWsseHeader(),
         );
         return $this;
     }
@@ -165,13 +163,9 @@ class DiamanteDesk_Api
 
         /** add post data before do request */
         if ($this->_httpMethod == 'POST') {
-            $fieldsString = '';
-            foreach ($this->_postData as $key => $value) {
-                $fieldsString .= $key . '=' . $value . '&';
-            }
-            $fieldsString = rtrim($fieldsString, '&');
             curl_setopt($this->_ch, CURLOPT_POST, count($this->_postData));
-            curl_setopt($this->_ch, CURLOPT_POSTFIELDS, $fieldsString);
+            curl_setopt($this->_ch, CURLOPT_POSTFIELDS, json_encode($this->_postData));
+            $this->_headers[] = 'Content-Type: application/json';
         }
 
         /** add get parameters to uri before request */
@@ -187,6 +181,7 @@ class DiamanteDesk_Api
             curl_setopt($this->_ch, CURLOPT_URL, $this->_url);
         }
 
+        curl_setopt($this->_ch, CURLOPT_HTTPHEADER, $this->_headers);
         $result = curl_exec($this->_ch);
 
         $header_size = curl_getinfo($this->_ch, CURLINFO_HEADER_SIZE);
@@ -200,6 +195,10 @@ class DiamanteDesk_Api
         if ($body) {
             $this->result = json_decode($body);
         }
+
+        $this->_postData = array();
+        $this->_getData = array();
+
         return $this;
     }
 
@@ -247,6 +246,7 @@ class DiamanteDesk_Api
     public function getUsers()
     {
         $this->init()
+            ->addFilter('limit','999999')
             ->setMethod('users')
             ->doRequest();
 
