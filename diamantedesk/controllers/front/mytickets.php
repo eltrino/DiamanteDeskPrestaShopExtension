@@ -159,7 +159,11 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
         $ticket = $api->getTicket((int)$_GET['ticket']);
 
         if ($ticket && $ticket->comments) {
-            foreach ($ticket->comments as $comment) {
+            foreach ($ticket->comments as $key => $comment) {
+                if ($comment->private === true) {
+                    unset ($ticket->comments[$key]);
+                    continue;
+                }
                 $comment->authorData = $this->getAuthor($comment);
                 $comment->created_at = date("U", strtotime($comment->created_at));
             }
