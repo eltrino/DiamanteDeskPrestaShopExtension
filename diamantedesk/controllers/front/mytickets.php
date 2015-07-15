@@ -37,6 +37,13 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
     public function initContent()
     {
 
+        if (isset($this->context->cookie->redirect_success_message)){
+            $this->context->smarty->assign(array(
+                'success' => $this->context->cookie->redirect_success_message,
+            ));
+            $this->context->cookie->__unset('redirect_success_message');
+        }
+
         if (isset($_GET['ticket'])) {
             $this->initTicketContent();
             return;
@@ -55,7 +62,9 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 if (!getDiamanteDeskApi()->createTicket($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
-                    $this->context->smarty->assign('success', 'Ticket was successfully created.');
+                    $this->context->cookie->__set('redirect_success_message', 'Ticket was successfully created.');
+                    Tools::redirect(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null);
+                    return;
                 }
             }
         }
@@ -133,7 +142,9 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 if (!getDiamanteDeskApi()->addComment($data)) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
-                    $this->context->smarty->assign('success', 'Comment successfully added');
+                    $this->context->cookie->__set('redirect_success_message', 'Comment successfully added.');
+                    Tools::redirect(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null);
+                    return;
                 }
             }
         }
