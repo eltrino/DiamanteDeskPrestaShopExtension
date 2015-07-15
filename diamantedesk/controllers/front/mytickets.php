@@ -165,6 +165,20 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             }
         }
 
+        foreach(DiamanteDesk_Api::$_statuses as $status) {
+            if ($status['status_id'] == $ticket->status) {
+                $ticket->status = $status['name'];
+                break;
+            }
+        }
+
+        foreach(DiamanteDesk_Api::$_priorities as $priority) {
+            if ($priority['priority_id'] == $ticket->priority) {
+                $ticket->priority = $priority['name'];
+                break;
+            }
+        }
+
         $this->context->smarty->assign(array(
             'ticket' => $ticket
         ));

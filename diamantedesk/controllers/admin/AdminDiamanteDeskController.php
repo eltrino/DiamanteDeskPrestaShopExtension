@@ -25,48 +25,6 @@ class AdminDiamanteDeskController extends ModuleAdminController
     /** @var DiamanteDesk_Api */
     protected $_api;
 
-    private static $_priorities = array(
-        array(
-            'name' => 'Low',
-            'priority_id' => 'low'
-        ),
-        array(
-            'name' => 'Medium',
-            'priority_id' => 'medium'
-        ),
-        array(
-            'name' => 'High',
-            'priority_id' => 'high'
-        ),
-    );
-
-    private static $_statuses = array(
-        array(
-            'name' => 'New',
-            'status_id' => 'new'
-        ),
-        array(
-            'name' => 'Open',
-            'status_id' => 'open'
-        ),
-        array(
-            'name' => 'Pending',
-            'status_id' => 'pending'
-        ),
-        array(
-            'name' => 'In Progress',
-            'status_id' => 'in_progress'
-        ),
-        array(
-            'name' => 'Closed',
-            'status_id' => 'closed'
-        ),
-        array(
-            'name' => 'On Hold',
-            'status_id' => 'on_hold'
-        ),
-    );
-
     protected function _init()
     {
         if (!$this->_api) {
@@ -301,7 +259,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'required' => true,
                     'class' => 't',
                     'options' => array(
-                        'query' => static::$_priorities,
+                        'query' => DiamanteDesk_Api::$_priorities,
                         'id' => 'priority_id',
                         'name' => 'name'
                     )
@@ -313,7 +271,7 @@ class AdminDiamanteDeskController extends ModuleAdminController
                     'required' => true,
                     'class' => 't',
                     'options' => array(
-                        'query' => static::$_statuses,
+                        'query' => DiamanteDesk_Api::$_statuses,
                         'id' => 'status_id',
                         'name' => 'name'
                     )

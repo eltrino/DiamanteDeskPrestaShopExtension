@@ -50,6 +50,48 @@ class DiamanteDesk_Api
 
     protected $_headers = array();
 
+    public static $_priorities = array(
+        array(
+            'name' => 'Low',
+            'priority_id' => 'low'
+        ),
+        array(
+            'name' => 'Medium',
+            'priority_id' => 'medium'
+        ),
+        array(
+            'name' => 'High',
+            'priority_id' => 'high'
+        ),
+    );
+
+    public static $_statuses = array(
+        array(
+            'name' => 'New',
+            'status_id' => 'new'
+        ),
+        array(
+            'name' => 'Open',
+            'status_id' => 'open'
+        ),
+        array(
+            'name' => 'Pending',
+            'status_id' => 'pending'
+        ),
+        array(
+            'name' => 'In Progress',
+            'status_id' => 'in_progress'
+        ),
+        array(
+            'name' => 'Closed',
+            'status_id' => 'closed'
+        ),
+        array(
+            'name' => 'On Hold',
+            'status_id' => 'on_hold'
+        ),
+    );
+
     /**
      * @return $this
      */
