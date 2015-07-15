@@ -332,6 +332,13 @@ class DiamanteDesk_Api
             $data['author'] = static::TYPE_ORO_USER . $this->getDefaultUser()->id;
         }
 
+        foreach(static::$_statuses as $status) {
+            if ($status['name'] == $data['ticketStatus']) {
+                $data['ticketStatus'] = $status['status_id'];
+                break;
+            }
+        }
+
         $this->init()
             ->setMethod('desk/comments')
             ->setHttpMethod('POST');
