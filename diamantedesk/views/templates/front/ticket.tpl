@@ -48,7 +48,7 @@
             </tr>
 
             <tr>
-                <td>{l s='Description'}</td>
+                <td style="vertical-align: top;">{l s='Description'}</td>
                 <td>{$ticket->description}</td>
             </tr>
             </tbody>
