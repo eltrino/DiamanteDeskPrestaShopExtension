@@ -167,6 +167,11 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 
         $ticket = $api->getTicket((int)$_GET['ticket']);
 
+        if (isset($ticket->error) && $ticket->error) {
+            Tools::redirect('index.php?controller=404');
+            return;
+        }
+
         if ($ticket && $ticket->comments) {
             foreach ($ticket->comments as $key => $comment) {
                 if ($comment->private === true) {
