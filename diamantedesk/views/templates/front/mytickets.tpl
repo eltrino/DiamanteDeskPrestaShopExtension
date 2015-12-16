@@ -52,10 +52,18 @@
                         {$ticket->created_at|date_format:'%Y-%m-%d %H:%M:%S'}
                     </td>
                     <td>
-                        {$ticket->priority}
+                        {foreach from=$priorityMap item=priority name=myLoop2}
+                            {if $ticket->priority eq $priority['priority_id']}
+                                {$priority['name']}
+                            {/if}
+                        {/foreach}
                     </td>
                     <td>
-                        {$ticket->status}
+                        {foreach from=$statusMap item=status name=myLoop3}
+                            {if $ticket->status eq $status['status_id']}
+                                {$status['name']}
+                            {/if}
+                        {/foreach}
                     </td>
                     <td>
                         <a class="btn btn-default button button-small" href="?ticket={$ticket->id}">

@@ -99,7 +99,9 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 'range' => static::TICKETS_PER_PAGE,
                 'pages_nb' => 1,
                 'tickets' => array(),
-                'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS')
+                'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'),
+                'priorityMap' => DiamanteDesk_Api::$_priorities,
+                'statusMap' => DiamanteDesk_Api::$_statuses,
             ));
             $this->setTemplate('mytickets.tpl');
             return;
@@ -124,7 +126,9 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             'range' => static::TICKETS_PER_PAGE,
             'pages_nb' => $lastPage,
             'tickets' => $tickets,
-            'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS')
+            'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'),
+            'priorityMap' => DiamanteDesk_Api::$_priorities,
+            'statusMap' => DiamanteDesk_Api::$_statuses,
         ));
 
         $this->setTemplate('mytickets.tpl');

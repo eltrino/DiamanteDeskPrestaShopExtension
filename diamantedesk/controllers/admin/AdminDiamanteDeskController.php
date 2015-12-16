@@ -160,14 +160,30 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 $date = new DateTime($ticket->created_at);
                 $createdAt = $date->format('Y-m-d H:i:s');
 
+                $realStatus = '';
+                foreach (DiamanteDesk_Api::$_statuses as $status) {
+                    if ($status['status_id'] == $ticket->status) {
+                        $realStatus = $status['name'];
+                        break;
+                    }
+                }
+
+                $realPriority = '';
+                foreach (DiamanteDesk_Api::$_priorities as $priority) {
+                    if ($priority['priority_id'] == $ticket->priority) {
+                        $realPriority = $priority['name'];
+                        break;
+                    }
+                }
+
                 $this->_list[] = array(
                     'id_configuration' => $ticket->key,
                     'id' => $ticket->id,
                     'subject' => $ticket->subject,
                     'email' => $email,
                     'createdAt' => $createdAt,
-                    'priority' => $ticket->priority,
-                    'status' => $ticket->status,
+                    'priority' => $realPriority,
+                    'status' => $realStatus,
                 );
             }
         }
