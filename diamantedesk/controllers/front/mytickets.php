@@ -173,7 +173,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                     unset ($ticket->comments[$key]);
                     continue;
                 }
-                $comment->authorData = $this->getAuthor($comment);
+                $comment->authorName = $this->getAuthor($comment);
                 $comment->created_at = date("U", strtotime($comment->created_at));
             }
         }
@@ -205,22 +205,15 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
      */
     public function getAuthor($comment)
     {
-        if ($comment->author_type . '_' == DiamanteDesk_Api::TYPE_DIAMANTE_USER) {
-            foreach ($this->diamanteUsers as $user) {
-                if ($comment->author == $user->id) {
-                    $userData = new \stdClass();
-                    $userData->firstName = $user->first_name;
-                    $userData->lastName = $user->last_name;
-                    return $userData;
-                }
-            }
-        } else {
-            foreach ($this->oroUsers as $user) {
-                if ($comment->author == $user->id) {
-                    return $user;
-                }
-            }
+        $customerRelationModel = getCustomerRelationModel();
+        $customer = $this->context->customer;
+        $userId = $customerRelationModel->getUserId($customer->id);
+
+        if ($comment->author->id == 'diamante_' . $userId) {
+            return $customer->firstname . ' ' . $customer->lastname;
         }
+
+        return $comment->author->name;
     }
 
     /**

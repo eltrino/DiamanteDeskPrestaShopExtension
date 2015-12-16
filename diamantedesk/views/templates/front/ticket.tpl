@@ -66,11 +66,7 @@
                         <div class="comment row" itemprop="review" itemscope="" itemtype="http://schema.org/Review">
                             <div class="comment_author col-sm-2">
                                 <div class="comment_author_infos">
-                                    {if $comment->author==0}
-                                        <strong itemprop="author">{l s='You'}</strong>
-                                    {else}
-                                        <strong itemprop="author">{$comment->authorData->firstName} {$comment->authorData->lastName}</strong>
-                                    {/if}
+                                    <strong itemprop="author">{$comment->authorName}</strong>
                                     <em>{$comment->created_at|date_format:'%Y-%m-%d %H:%M:%S'}</em>
                                 </div>
                             </div>

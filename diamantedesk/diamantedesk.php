@@ -21,6 +21,7 @@ include_once(dirname(__FILE__) . '/Api.php');
 include_once(dirname(__FILE__) . '/Config.php');
 include_once(dirname(__FILE__) . '/Ticket.php');
 include_once(dirname(__FILE__) . '/OrderRelation.php');
+include_once(dirname(__FILE__) . '/CustomerRelation.php');
 
 class DiamanteDesk extends Module
 {

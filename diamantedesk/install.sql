@@ -22,3 +22,14 @@ CREATE TABLE IF NOT EXISTS `PREFIX_diamantedesk_order_relation` (
 )
   ENGINE =ENGINE_TYPE
   DEFAULT CHARSET =utf8;
+
+CREATE TABLE IF NOT EXISTS `PREFIX_diamantedesk_customer_relation` (
+  `relation_id` INT(10) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `customer_id` INT(10) UNSIGNED NOT NULL,
+  `user_id`    INT(10) UNSIGNED NOT NULL,
+  PRIMARY KEY (`relation_id`),
+  KEY `customer_id` (`customer_id`),
+  KEY `user_id` (`user_id`)
+)
+  ENGINE =ENGINE_TYPE
+  DEFAULT CHARSET =utf8;

@@ -423,11 +423,32 @@ class DiamanteDesk_Api
      * @param $email
      * @return bool|mixed
      */
-    public function getDiamanteUser($email)
+    public function getDiamanteUserByEmail($email)
     {
         try {
             $this->init()
                 ->setMethod('desk/users/' . $email . '/')
+                ->doRequest();
+        } catch (Exception $e) {
+            return false;
+        }
+
+        if (!empty($this->result->error)) {
+            return false;
+        }
+
+        return $this->result;
+    }
+
+    /**
+     * @param $id
+     * @return bool
+     */
+    public function getDiamanteUser($id) {
+
+        try {
+            $this->init()
+                ->setMethod('desk/users/' . $id)
                 ->doRequest();
         } catch (Exception $e) {
             return false;
@@ -478,13 +499,24 @@ class DiamanteDesk_Api
             return false;
         }
 
+        $relationModel = getCustomerRelationModel();
+        $relationModel->saveRelation($customer->id, $this->result->id);
+
         return $this->result;
     }
 
     public function getOrCreateDiamanteUser(Customer $customer)
     {
-        $diamanteUser = $this->getDiamanteUser($customer->email);
+        $customerRelation = getCustomerRelationModel();
+        $userId = $customerRelation->getUserId($customer->id);
+
+        if ($userId) {
+            return $this->getDiamanteUser($userId);
+        }
+
+        $diamanteUser = $this->getDiamanteUserByEmail($customer->email);
         if ($diamanteUser) {
+            $customerRelation->saveRelation($customer->id, $diamanteUser->id);
             return $diamanteUser;
         }
 
