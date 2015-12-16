@@ -167,6 +167,14 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 
         $ticket = $api->getTicket((int)$_GET['ticket']);
 
+        $customerRelationModel = getCustomerRelationModel();
+        $userId = $customerRelationModel->getUserId($this->context->customer->id);
+
+        if ($ticket->reporter !== 'diamante_' . $userId) {
+            Tools::redirect('index.php?controller=404');
+            return;
+        }
+
         if (isset($ticket->error) && $ticket->error) {
             Tools::redirect('index.php?controller=404');
             return;
