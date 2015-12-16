@@ -17,6 +17,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
 {
     const TICKETS_PER_PAGE = 25;
     const TOTAL_RESULT_HEADER = 'X-Total';
+    const FILE_NAME_FIELD = 'attachment';
 
     public $ssl = true;
     public $auth = true;
@@ -59,9 +60,13 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                 $api = getDiamanteDeskApi();
                 $diamanteUser = $api->getOrCreateDiamanteUser($this->context->customer);
                 $data['reporter'] = DiamanteDesk_Api::TYPE_DIAMANTE_USER . $diamanteUser->id;
-                if (!getDiamanteDeskApi()->createTicket($data)) {
+                $newTicket = getDiamanteDeskApi()->createTicket($data);
+                if (!$newTicket) {
                     $this->errors[] = 'Something went wrong. Please try again later or contact us';
                 } else {
+
+                    $this->saveAttachment($newTicket);
+
                     $this->context->cookie->__set('redirect_success_message', 'Ticket was successfully created.');
                     Tools::redirect(isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : null);
                     return;
@@ -211,6 +216,25 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
                     return $user;
                 }
             }
+        }
+    }
+
+    /**
+     * @param $ticket stdClass
+     */
+    protected function saveAttachment($ticket)
+    {
+        if (isset($_FILES) && isset($_FILES[self::FILE_NAME_FIELD]) && $_FILES[self::FILE_NAME_FIELD]['size'] !== 0) {
+            $api = getDiamanteDeskApi();
+            $fileContent = file_get_contents($_FILES[self::FILE_NAME_FIELD]['tmp_name']);
+            $fileName = $_FILES[self::FILE_NAME_FIELD]['name'];
+
+            $api->addAttachmentToTicket(array(
+                'ticket_id' => $ticket->id,
+                'filename'  => $fileName,
+                'content'   => base64_encode($fileContent)
+            ));
+
         }
     }
 }

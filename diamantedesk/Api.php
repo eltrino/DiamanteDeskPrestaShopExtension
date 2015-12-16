@@ -397,8 +397,26 @@ class DiamanteDesk_Api
             $relationModel->saveRelation($this->result->key, $data['id_order']);
         }
 
-        return true;
+        return $this->result;
 
+    }
+
+    public function addAttachmentToTicket($data)
+    {
+        $ticketId = $data['ticket_id'];
+        unset($data['ticket_id']);
+
+        $this->init()
+            ->setMethod('desk/tickets/' . $ticketId . '/attachments')
+            ->setHttpMethod('POST')
+            ->addPostData('attachmentsInput', array($data))
+            ->doRequest();
+
+        if (!empty($this->result->error)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**

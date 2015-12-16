@@ -138,12 +138,16 @@
 </div>
 
 <div class="box" id="ticket_form" style="display: none;">
-    <form method="post" class="std" id="add_ticket">
+    <form method="post" class="std" id="add_ticket" enctype="multipart/form-data">
         <div class="required form-group">
             <label for="subject">{l s='Subject'}<sup>*</sup></label>
             <input class="is_required validate form-control"
                    type="text" name="subject" id="subject"
                    value="{if isset($smarty.post.subject)}{$smarty.post.subject}{else}{/if}"/>
+        </div>
+        <div class="image item-field form-group">
+            <label for="attachment">{l s='Attachment'}</label>
+            <input type="file" id="attachment" name="attachment" />
         </div>
         <div class="form-group required">
             <label for="description">{l s='Description'}<sup>*</sup></label>
