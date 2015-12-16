@@ -119,6 +119,16 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             $ticket->created_at = date("U", strtotime($ticket->created_at));
         }
 
+        $defaultBranch = Configuration::get('DIAMANTEDESK_DEFAULT_BRANCH');
+        $branches = false;
+        if ($defaultBranch == 0) {
+            $branches = $api->getBranches();
+        }
+
+        if (count($branches) == 1) {
+            $branches = false;
+        }
+
         $this->context->smarty->assign(array(
             'start' => 1,
             'stop' => $lastPage,
@@ -129,6 +139,7 @@ class DiamanteDeskMyTicketsModuleFrontController extends ModuleFrontController
             'diamantedesk_url' => Configuration::get('DIAMANTEDESK_SERVER_ADDRESS'),
             'priorityMap' => DiamanteDesk_Api::$_priorities,
             'statusMap' => DiamanteDesk_Api::$_statuses,
+            'branches' => $branches
         ));
 
         $this->setTemplate('mytickets.tpl');

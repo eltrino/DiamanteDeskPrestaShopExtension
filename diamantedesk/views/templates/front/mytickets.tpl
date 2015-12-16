@@ -153,6 +153,16 @@
                    type="text" name="subject" id="subject"
                    value="{if isset($smarty.post.subject)}{$smarty.post.subject}{else}{/if}"/>
         </div>
+        {if $branches}
+            <div class="image item-field form-group">
+                <label for="branch">{l s='Branch'}</label>
+                <select id="branch" name="branch" class="select form-control" style="width:200px;">
+                    {foreach from=$branches item=branch name=myLoop4}
+                        <option value="{$branch->id}">{$branch->name}</option>
+                    {/foreach}
+                </select>
+            </div>
+        {/if}
         <div class="image item-field form-group">
             <label for="attachment">{l s='Attachment'}</label>
             <input type="file" id="attachment" name="attachment" />
