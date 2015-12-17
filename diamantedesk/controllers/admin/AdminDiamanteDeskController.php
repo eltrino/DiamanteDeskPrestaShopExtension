@@ -250,18 +250,6 @@ class AdminDiamanteDeskController extends ModuleAdminController
             ),
             'input' => array(
                 array(
-                    'type' => 'select',
-                    'label' => $this->l('Branch'),
-                    'name' => 'branch',
-                    'required' => true,
-                    'class' => 't',
-                    'options' => array(
-                        'query' => $listBranches,
-                        'id' => 'branch_id',
-                        'name' => 'name'
-                    )
-                ),
-                array(
                     'type' => 'text',
                     'label' => $this->l('Subject'),
                     'name' => 'subject',
@@ -327,6 +315,25 @@ class AdminDiamanteDeskController extends ModuleAdminController
                 ),
             )
         );
+
+
+        $defaultBranch = Configuration::get('DIAMANTEDESK_DEFAULT_BRANCH');
+
+        if (!$defaultBranch) {
+            array_unshift($this->fields_form['input'], array(
+                'type'     => 'select',
+                'label'    => $this->l('Branch'),
+                'name'     => 'branch',
+                'required' => true,
+                'class'    => 't',
+                'options'  => array(
+                    'query' => $listBranches,
+                    'id'    => 'branch_id',
+                    'name'  => 'name'
+                )
+            ));
+        }
+
 
         $this->fields_form['submit'] = array(
             'title' => $this->l('Add Ticket'),
